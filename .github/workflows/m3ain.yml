@@ -1,34 +1,29 @@
-name: Kryptex Miner
+name: Kryptex Miner Single VM
 
 on:
-  workflow_dispatch: # Permite iniciar manualmente
+  workflow_dispatch: # Para iniciar manualmente
 
 jobs:
-  kryptex-mining:
-    strategy:
-      matrix:
-        vm: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] # 20 VMs paralelas
+  kryptex-single:
     runs-on: windows-latest
     steps:
-      - name: Set up working directory
+      - name: Criar pasta de trabalho
         run: |
           mkdir C:\kryptex
           cd C:\kryptex
 
-      - name: Download Kryptex
+      - name: Baixar Kryptex
         run: |
           Invoke-WebRequest -Uri "https://update.kryptex.com/windows/KryptexSetup.exe" -OutFile "C:\kryptex\KryptexSetup.exe"
 
-      - name: Install Kryptex silently
+      - name: Instalar Kryptex silenciosamente
         run: |
           Start-Process "C:\kryptex\KryptexSetup.exe" -ArgumentList "/S" -Wait
 
-      - name: Configure Kryptex for XMR
+      - name: Configurar Kryptex Worker
         run: |
-          $worker="krxX33M74R.worker"
+          $worker="krxX33M74R.worker" # Insira seu Worker ID aqui
           $pool="xmr.kryptex.network:802"
-          # Configuração do pool via arquivo config.json ou args pode variar
-          # Aqui apenas exemplo: criar um arquivo de configuração
           $config = @{
               "pools" = @(
                   @{
@@ -43,10 +38,10 @@ jobs:
           $json = $config | ConvertTo-Json -Depth 10
           Set-Content -Path "C:\kryptex\config.json" -Value $json
 
-      - name: Run Kryptex Miner
+      - name: Rodar Kryptex Miner
         run: |
           Start-Process "C:\Program Files (x86)\Kryptex\Kryptex.exe"
 
-      - name: Keep VM alive
+      - name: Manter VM ativa por 8h
         run: |
           timeout /t 28800
